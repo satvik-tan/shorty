@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  createdAt DateTime @default(now())
+  urls     ShortUrl[]
+}
+
+model ShortUrl {
+  id          String   @id @default(uuid())
+
+  // What users type in browser
+  shortCode   String   @unique
+  longUrl     String
+
+  // Relation
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Status & control
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime?
+
+  // Fast dashboard counter
+  totalClicks Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([shortCode])   // Explicit for hot path
+  @@index([userId])      // Fast listing per user
+}
