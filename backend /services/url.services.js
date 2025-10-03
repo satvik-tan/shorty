@@ -38,11 +38,14 @@ export async function createURL(req, res) {
       },
     });
 
+    // Return frontend URL, not backend URL
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    
     return res.status(201).json({
       success: true,
       data: {
         ...url,
-        shortUrl: `${req.protocol}://${req.get('host')}/${url.shortCode}`,
+        shortUrl: `${frontendUrl}/${url.shortCode}`,
       },
     });
   } catch (error) {
@@ -84,10 +87,23 @@ export async function getURL(req, res) {
 
       // 3. Cache it
       await redis.set(cacheKey, longUrl, 'EX', 3600);
+    } else {
+      // Still increment clicks even from cache
+      const url = await prisma.shortUrl.findUnique({
+        where: { shortCode },
+      });
+      
+      if (url) {
+        await prisma.shortUrl.update({
+          where: { id: url.id },
+          data: { totalClicks: { increment: 1 } },
+        });
+      }
     }
 
-    // 4. Redirect
-    return res.redirect(302, longUrl);
+    // 4. Return JSON with longUrl so frontend can redirect
+    console.log('✅ Redirecting to:', longUrl);
+    return res.json({ success: true, longUrl });
   } catch (error) {
     console.error('Get URL error:', error);
     return res.status(500).json({ error: 'Failed to redirect' });

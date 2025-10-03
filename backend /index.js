@@ -3,9 +3,14 @@ import express from 'express';
 import cors from 'cors';
 import { clerkMiddleware } from '@clerk/express';
 import urlRoutes from './routes/url.routes.js';
+import { globalLimiter } from './middlewares/rateLimiter.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Trust proxy - CRITICAL for getting real client IP behind Vercel/Fly.io/Cloudflare
+// Without this, all requests appear to come from the proxy IP
+app.set('trust proxy', 1); // Trust first proxy (Fly.io, Vercel, etc.)
 
 // CORS configuration - only allow frontend origin
 const corsOptions = {
@@ -17,6 +22,9 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '10kb' })); // Limit payload size
+
+// Global rate limiter (CRITICAL for abuse prevention)
+app.use(globalLimiter);
 
 // Security headers
 app.use((req, res, next) => {
@@ -58,6 +66,8 @@ app.use((req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🔒 Rate limiting enabled globally (100 req/min per IP)`);
+  console.log(`🌐 CORS enabled for: ${corsOptions.origin}`);
   console.log(`📅 Started at: ${new Date().toISOString()}`);
 });

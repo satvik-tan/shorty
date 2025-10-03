@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+import RedirectPage from './pages/RedirectPage';
 
 // Protected route wrapper
 function ProtectedRoute({ children }) {
@@ -32,6 +33,8 @@ function App() {
       </Route>
       <Route path="/sign-in/*" element={<SignInPage />} />
       <Route path="/sign-up/*" element={<SignUpPage />} />
+      {/* Redirect route - must be last to catch all shortCodes */}
+      <Route path="/:shortCode" element={<RedirectPage />} />
     </Routes>
   );
 }
