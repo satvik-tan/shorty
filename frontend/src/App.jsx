@@ -1,11 +1,12 @@
 import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useSearchParams } from 'react-router-dom';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import RedirectPage from './pages/RedirectPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 // Protected route wrapper
 function ProtectedRoute({ children }) {
@@ -17,11 +18,20 @@ function ProtectedRoute({ children }) {
   );
 }
 
+// Home wrapper to handle 404 redirects
+function HomeWrapper() {
+  const [searchParams] = useSearchParams();
+  if (searchParams.get('notfound') || searchParams.get('error')) {
+    return <NotFoundPage />;
+  }
+  return <HomePage />;
+}
+
 function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<HomeWrapper />} />
         <Route
           path="/dashboard"
           element={
