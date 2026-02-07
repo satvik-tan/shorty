@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function RedirectPage() {
   const { shortCode } = useParams();
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Immediately redirect to backend - it will handle the 302 redirect
