@@ -74,7 +74,9 @@ export async function getURL(req, res) {
       });
 
       if (!url || !url.isActive) {
-        return res.status(404).json({ error: 'Short URL not found' });
+        // Fallback to frontend 404 page
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        return res.redirect(302, `${frontendUrl}/?notfound=${shortCode}`);
       }
 
       // Increment DB hit counter
@@ -101,12 +103,14 @@ export async function getURL(req, res) {
       }
     }
 
-    // 4. Return JSON with longUrl so frontend can redirect
+    // 4. Use 302 redirect (temporary) - can be changed to 301 (permanent) if needed
     console.log('✅ Redirecting to:', longUrl);
-    return res.json({ success: true, longUrl });
+    return res.redirect(302, longUrl);
   } catch (error) {
     console.error('Get URL error:', error);
-    return res.status(500).json({ error: 'Failed to redirect' });
+    // Fallback to frontend on error
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    return res.redirect(302, `${frontendUrl}/?error=server`);
   }
 }
 

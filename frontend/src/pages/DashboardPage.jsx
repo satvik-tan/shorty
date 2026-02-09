@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const FRONTEND_URL = window.location.origin; // Use actual frontend URL
 
 function DashboardPage() {
   const { getToken } = useAuth();
@@ -204,7 +205,7 @@ function DashboardPage() {
                   ) : (
                     <>
                       <button
-                        onClick={() => copyToClipboard(`${API_URL}/${url.shortCode}`)}
+                        onClick={() => copyToClipboard(`${FRONTEND_URL}/${url.shortCode}`)}
                         className="btn-copy-small"
                       >
                         Copy
